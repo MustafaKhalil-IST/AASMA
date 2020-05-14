@@ -30,7 +30,7 @@ current_round = 0
 current_turn = 0
 shown_player = 1
 players_numbers = [
-    pygame.font.SysFont('Arial', 25).render('A{}'.format(i + 1), True, (255, 0, 0)) for i in range(4)
+    pygame.font.SysFont('Arial', 25, bold=True).render('A{}'.format(i + 1), True, (255, 69, 0)) for i in range(4)
 ]
 players_positions = [(800, 300), (400 + 20, 700), (0, 300), (400 + 20, 0)]
 
@@ -42,7 +42,7 @@ strategies_positions = [
     (players_positions[3][0] + 50, players_positions[3][1] + 10)
 ]
 stratgies_buttons = [
-    pygame.Rect(p[0], p[1], 100, 20) for p in strategies_positions
+    pygame.Rect(p[0], p[1], 110, 20) for p in strategies_positions
 ]
 shown_strategies = -1
 strategies_options = [
@@ -102,6 +102,7 @@ def show_table(cards, x=275, y=175, l=250, w=300):
     positions = [(x + w / 2 - offsetx, y - offsety), (x - offsetx, y + l / 2 - offsety),
                  (x + w - offsetx, y + l / 2 - offsety), (x + w / 2 - offsetx, y + l - offsety)]
     pygame.draw.lines(screen, (0, 0, 0), False, [[x, y], [x + w, y], [x + w, y + l], [x, y + l], [x, y]], 2)
+    pygame.draw.rect(screen, [166, 128, 100], pygame.Rect(x, y, w - 3, l - 3))
     for i, card in enumerate(cards):
         draw_card(card, positions[i])
 
@@ -113,10 +114,8 @@ def show_run_button():
 
 def show_strategies_buttons():
     for i, strategy in enumerate(stratgies_buttons):
-        text = pygame.font.SysFont('Arial', 15).render(current_strategies[i], True, (255, 255, 255))
-        pygame.draw.rect(screen, (0, 0, 125), strategy)
-        # pygame.draw.rect(pygame.font.SysFont('Arial', 14).render(current_strategies[i], True, (0, 0, 0)),
-        # (0, 0, 0), text.get_rect(), 1)
+        text = pygame.font.SysFont('Arial', 15, bold=True).render(current_strategies[i], True, (255, 255, 255))
+        pygame.draw.rect(screen, (219, 127, 125), strategy)
         screen.blit(text, strategies_positions[i])
 
 
@@ -133,9 +132,9 @@ def show_round_number():
 def show_points():
     positions = [(850, 600), (850, 650), (850, 700), (850, 750)]
     font = pygame.font.SysFont('Arial', 25)
-    screen.blit(font.render('Points', True, (0, 0, 255)), (850, 550))
+    screen.blit(font.render('Points', True, (255, 0, 128)), (850, 550))
     for i in range(1, 5):
-        screen.blit(font.render('A{}: {}'.format(i, points[i - 1]), True, (0, 0, 255)), positions[i - 1])
+        screen.blit(font.render('A{}: {}'.format(i, points[i - 1]), True, (255, 0, 128)), positions[i - 1])
 
 
 def show_strategies_menu(index):
@@ -151,7 +150,7 @@ def show_strategies_menu(index):
 
 
 def display_screen():
-    screen.fill((255, 255, 255))
+    screen.fill((0, 15, 149))
     show_players_numbers()
     show_rotate_player_button()
     show_strategies_buttons()
@@ -166,7 +165,6 @@ def display_screen():
 
 def run_turn():
     table, winner, turn_points = game.turn(current_turn, current_round + 1, first=first)
-    print(winner)
     for i in range(4):
         points[i] = turn_points[i]
         current_table[i] = str(table[i][0] - 1) + str(table[i][1]).lower()
@@ -206,7 +204,6 @@ while running:
                 temp_strategies = []
                 for i in range(4):
                     temp_strategies.append(current_strategies[(i - 1) % 4])
-                # current_strategies = [temp_strategies[i] for i in range(len(temp_strategies) - 1, -1, -1)]
                 current_strategies = temp_strategies
                 del temp_strategies
                 shown_player = shown_player + 1
