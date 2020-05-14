@@ -59,25 +59,33 @@ class Game:
 
         # Playing the 13 rounds
         for i in range(13):
-            # Cards on the table (from first to last player)
-            self.table = []
-
-            # Each player's turn
-            for n in range(self.first, self.first + 4):
-                # Player number
-                m = n % 4
-                self.table += [self.players[m].play(self.table)]
-
-            # Determining winning player
-            self.winner = self.determine_winner()
-
-            # Update points
-            self.update_points(round=round, index=i)
-
-            # Reset starting player
-            self.first = self.winner
+            self.turn(i, round)
 
         return self.points
+
+    def turn(self, i, round, first=-1):
+        if self.first == -1:
+            self.first = first
+        # Cards on the table (from first to last player)
+        self.table = []
+        # Each player's turn
+        for n in range(self.first, self.first + 4):
+            # Player number
+            m = n % 4
+            self.table += [self.players[m].play(self.table)]
+        # Determining winning player
+        self.winner = self.determine_winner()
+        # Update points
+        self.update_points(round=round, index=i)
+        # Reset starting player
+        self.first = self.winner
+
+        return self.table, self.winner, self.points
+
+    def get_player_deck(self, player):
+        if player == -1:
+            return 13 * ["j"]
+        return self.players[player].hand if self.players[player].hand is not None else 13 * [(12, "d")]
 
     def run_game(self, strategies):
         for i in range(6):
