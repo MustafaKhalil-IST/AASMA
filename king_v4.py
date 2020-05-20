@@ -240,12 +240,6 @@ class Agent:
             return chosen
               
         elif self.strat == 'proactive' and self.round==1: #Strategy: jogar imediatamente abaixo no naipe (cc jogar a mais alta), baldar a carta mais alta do naipe com menos cartas
-            # print('mao do a0'+ str(a0.hand))
-            # print('mao do a1:'+ str(a1.hand))
-            # print('mao do a2:'+ str(a2.hand))
-            # print('mao do a3:'+ str(a3.hand))
-            if len(table) == 1:
-                puxada = table[0]  #1st card played in the table
             if table == []:
                  puxada=[]
                  occ=[]
@@ -269,7 +263,7 @@ class Agent:
                  i=0
                  aux2 = [] #c,d,h,s
                  escolhido= False  #determine if a card has already been chosen
-                 while i <= len(occ)-1: #preferencia alfabetica no sorted (clubs > diam > hearts > spades )
+                 while i <= len(occ)-1 and not escolhido: 
                      if occ[i][0] > 0:  
                          aux = []
                          if occ[i][1] == 'D':                             
@@ -279,16 +273,12 @@ class Agent:
                          if occ[i][1] == 'C':
                              aux2 = self.clubs
                          if occ[i][1] == 'S':
-                           aux2 = self.spades
+                             aux2 = self.spades
                          j=0
                          while j <= len(selectable)-1:
                              if selectable[j][1] == occ[i][1]:
                                  aux += [selectable[j]]
                              j=j+1
-                            
-                         aux3 = [x for x in aux2 if x not in aux]       #naipe sem a mao do jogador 
-                         if aux3 == []:  #naipe esta seco (falta ver o caso em que e o ultimo naipe (occ=[0,0,0,X]))
-                             pass
                          aux3 = [x for x in aux2 if x not in aux]       #naipe sem a mao do jogador 
                          k=0
                          while k <= len(aux)-1:  
@@ -297,19 +287,13 @@ class Agent:
                              while l <= len(aux3)-1 and aux3[l][0] < aux[k][0]:  #check if it is in the 3 smallest cards of the suit 
                                  count += 1
                                  l=l+1
-                             if count < 4 and aux3 != [] and count != len(aux3):  #garantir que o ha cartas abaixo que faltam sair 
+                             if count < 3 and aux3 != [] and count != len(aux3):  #garantir que o ha cartas abaixo que faltam sair 
                                  chosen = aux[k]
-                                 escolhido = True
-                                 break
-                             elif i==3:  #caso em que o ultimo naipe da mao tambem esta seco esolhemos so uma carta pq ja nao faz diferença 
-                                 chosen = aux[k]
-                                 escolhido = True
-                                 pass #ver se o break tambem funciona aqui                             
+                                 escolhido = True  
                              k=k+1
-                     if escolhido == True:
-                          break
                      i=i+1
-
+                 if not escolhido:
+                     chosen=sorted(selectable)[0]
                  self.hand.remove(chosen)
                  if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
                     self.diam.remove(chosen)
@@ -332,15 +316,28 @@ class Agent:
                     j=0
                     while j <= len(selectable)-1:
                         if selectable[j][0] < puxada[0]:
-                            lst1 += [selectable[j]]                                                                    
-                            chosen = lst1[-1]  #chosen is the closest undervalued card of the 1st card played (carta imediatamente abaixo da puxada)
+                            lst1 += [selectable[j]]   
+                        else:
+                            lst2 += [selectable[j]] 
+                        j=j+1                                                                
+                    if lst1!=[]:
+                        chosen = lst1[-1]  #chosen is the closest undervalued card of the 1st card played (carta imediatamente abaixo da puxada)
+                    else:
+                        if puxada[1] == 'D':                             
+                             aux2 = self.diam
+                        elif puxada[1] == 'H':
+                             aux2 = self.hearts
+                        elif puxada[1] == 'C':
+                             aux2 = self.clubs
+                        elif puxada[1] == 'S':
+                             aux2 = self.spades
+                        aux3=[x for x in aux2 if x not in selectable]
+                        if (len([x for x in aux3 if x[0]<lst2[0][0]])>1 and len(table)==2) or (len([x for x in aux3 if x[0]<lst2[0][0]])>0 and len(table)==1):
+                            chosen = lst2[0]  
+                        else:
+                            chosen = lst2[-1]     
                         
-                        elif lst1 ==[]: 
-                            lst2 += [selectable[j]]
-                            chosen = lst2[-1]     #otherwise play the highest of the suit
-                            puxada = chosen   #new highest card and the card players should play a bit below 
-                        j=j+1
-                else: #Strategy: baldar o naipe com menos cartas 
+                else: #Strategy: play the highest card from the suit with fewer cards
                     occ=[]
                     nd=0     #number of cards in hand for each suit
                     nh=0
@@ -361,7 +358,7 @@ class Agent:
                     occ = sorted(occ, key = lambda x: x[0])
                     i=0
                     aux2 = [] #c,d,h,s
-                    while i <= len(occ)-1: #preferencia alfabetica no sorted (clubs > diam > hearts > spades )
+                    while i <= len(occ)-1: 
                         if occ[i][0] > 0:
                             aux = []
                             j=0
@@ -377,7 +374,7 @@ class Agent:
                                 if selectable[j][1] == occ[i][1]:
                                     aux += [selectable[j]]
                                 j=j+1
-                            if aux2[:len(aux)] == aux: #Are they the lowest cards in the deck? True or False                                 
+                            if aux2[:len(aux)] == aux: #Are they the lowest cards in the deck?                           
                                 if i == 3:
                                     chosen = max(aux, key= lambda x: x[0])
                                     break
@@ -585,7 +582,7 @@ class Agent:
                                 else:
                                     chosen = max(aux)
                                     escolhido = True
-                        i+=1                 
+                        i+=1           
                 self.hand.remove(chosen)
             if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
                 self.diam.remove(chosen)
@@ -600,287 +597,282 @@ class Agent:
 
 
         elif self.strat == 'proactive' and self.round == 3:   #ronda das damas
-                    # print('mao do a0:'+ str(a0.hand))
-                    # print('mao do a1:'+ str(a1.hand))
-                    # print('mao do a2:'+ str(a2.hand))
-                    # print('mao do a3:'+ str(a3.hand))            
-                    # print('table :'+ str(table)) 
-                    
-                    
-                    if len(table) == 1:
-                        puxada = table[0]  #1st card played in the table
-                    if table == []:
-                        occ=[]
-                        nd=0     #number of cards in hand for each suit
-                        nh=0
-                        nc=0
-                        ns=0
+            # print('mao do a0:'+ str(a0.hand))
+            # print('mao do a1:'+ str(a1.hand))
+            # print('mao do a2:'+ str(a2.hand))
+            # print('mao do a3:'+ str(a3.hand))            
+            # print('table :'+ str(table)) 
+            if len(table) == 1:
+                puxada = table[0]  #1st card played in the table
+            if table == []:
+                occ=[]
+                nd=0     #number of cards in hand for each suit
+                nh=0
+                nc=0
+                ns=0
+                j=0
+                while j <= len(selectable)-1:
+                    if selectable[j][1] == 'D':
+                        nd+=1
+                    if selectable[j][1] == 'H':
+                        nh+=1
+                    if selectable[j][1] == 'C':
+                        nc+=1
+                    if selectable[j][1] == 'S':
+                        ns+=1
+                    j+=1
+                occ = [[nd,'D'], [nh,'H'], [nc,'C'], [ns,'S']] #list of occurences for each suit 
+                occ = sorted(occ, key = lambda x: x[0])                
+                escolhido = False 
+                i=0
+                while i <= len(occ)-1 and escolhido == False:
+                    aux=[]
+                    k=0
+                    while k <= len(selectable)-1:
+                        if selectable[k][1] == occ[i][1]:
+                            aux += [selectable[k]]
+                        k+=1
+                    aux2 = []
+                    j=0
+                    while j <= len(aux)-1:
+                        if aux[j][0] < 12: #lista com as cartas abaixo da dama 
+                            aux2 += [aux[j]]
+                        j+=1
+                    if len(aux2) >= 3:
                         j=0
-                        while j <= len(selectable)-1:
-                            if selectable[j][1] == 'D':
-                                nd+=1
-                            if selectable[j][1] == 'H':
-                                nh+=1
-                            if selectable[j][1] == 'C':
-                                nc+=1
-                            if selectable[j][1] == 'S':
-                                ns+=1
-                            j+=1
-                        occ = [[nd,'D'], [nh,'H'], [nc,'C'], [ns,'S']] #list of occurences for each suit 
-                        occ = sorted(occ, key = lambda x: x[0])                
-                        escolhido = False 
-                        i=0
-                        while i <= len(occ)-1 and escolhido == False:
-                            aux=[]
-                            k=0
-                            while k <= len(selectable)-1:
-                                if selectable[k][1] == occ[i][1]:
-                                    aux += [selectable[k]]
-                                k+=1
-                            aux2 = []
-                            j=0
-                            while j <= len(aux)-1:
-                                if aux[j][0] < 12: #lista com as cartas abaixo da dama 
-                                    aux2 += [aux[j]]
-                                j+=1
-                            if len(aux2) >= 3:
-                                j=0
-                                while j <= len(aux)-1:
-                                    if (12,aux[0][1]) in aux: #se temos a dama na mao
-                                        chosen = max(aux2)
-                                        escolhido = True
-                                    else:
-                                        pass
-                                    j+=1    
-                            i+=1
-                     
-                        i=0
-                        while i <= len(occ)-1 and escolhido == False:
-                            aux=[]
-                            k=0
-                            while k <= len(selectable)-1:
-                                if selectable[k][1] == occ[i][1]:
-                                    aux += [selectable[k]]
-                                k+=1
-                            aux2 = []
-                            j=0
-                            while j <= len(aux)-1:
-                                if aux[j][0] < 12: #lista com as cartas abaixo da dama 
-                                    aux2 += [aux[j]]
-                                j+=1
-                            if len(aux2) >= 3:
-                                j=0
-                                while j <= len(aux)-1:
-                            
-                                    if ((13,aux[0][1]) or (14,aux[0][1])) in aux: #se temos rei ou as na mao
-                                        chosen = max(aux2)
-                                        escolhido = True
-                                    else:
-                                        pass
-                                    j+=1    
-                            i+=1
-                            
-                        
-                        if escolhido == False:
-                            i=0
-                            while i <= len(occ)-1 and escolhido == False:
-                                if occ[i][0] > 0:
-                                    aux=[]
-                                    k=0
-                                    while k <= len(selectable)-1:
-                                        if selectable[k][1] == occ[i][1]:
-                                            aux += [selectable[k]]
-                                        k+=1
-                                    aux2 = []
-                                    j=0
-                                    while j <= len(aux)-1:
-                                        if aux[j][0] < 12:
-                                            aux2 +=[aux[j]]
-                                        j+=1
-                                    if aux2 != []:
-                                        chosen = max(aux2)
-                                        escolhido = True
-                                    else:
-                                        pass
-                                    
-                                i+=1     
-                            if escolhido == False:
-                                chosen = max(selectable)
+                        while j <= len(aux)-1:
+                            if (12,aux[0][1]) in aux: #se temos a dama na mao
+                                chosen = max(aux2)
                                 escolhido = True
-                        
-                        
-                        
-                        self.hand.remove(chosen)
-                    else:
-                        i=0
-                        puxada = table[0] 
-                        while i <= len(table)-1:
-                            if table[i][0] > puxada[0] and table[i][1] == table[0][1]:
-                                puxada = table[i]
-                            i=i+1                    
-                        if selectable[0][1] == puxada[1]: #selectable contains one card of the same suit at least
-                            aux3=[]
-                            if selectable[0][1] == 'D':
-                                aux3 = [x for x in self.diam if x not in selectable]       #naipe sem a mao do jogador 
-                            if selectable[0][1] == 'H':
-                                aux3 = [x for x in self.hearts if x not in selectable]       #naipe sem a mao do jogador 
-                            if selectable[0][1] == 'C':
-                                aux3 = [x for x in self.clubs if x not in selectable]       #naipe sem a mao do jogador 
-                            if selectable[0][1] == 'S':
-                                aux3 = [x for x in self.spades if x not in selectable]       #naipe sem a mao do jogador 
-                            if len(aux3) > 5: #definimos jogar a mais alta (ate a dama) ate haver 5 cartas do naipe (equivalente a 2 puxadas ja feitas)
-                                j=0
-                                ate12 = []
-                                mais12 = []
-                                while j<=len(selectable)-1:
-                                    if selectable[j][0] < 12:   #cartas abaixo da dama
-                                        ate12 += [selectable[j]]
-                                    else:
-                                        mais12 += [selectable[j]]                            
-                                    j+=1
-                                if ate12 != []:
-                                    chosen = max(ate12)
-                                else:
-                                    chosen = min(mais12)
-                            else:   
-                                if len(table) == 3:   
-                                    if max(selectable) != 12: 
-                                        chosen = max(selectable)
-                                    else:
-                                        chosen = selectable[-2]
-                                elif  aux3 != []:
-                                    chosen = min(selectable)
-                                else:
-                                    chosen = max(selectable)
-                            lst1 = []
-                            lst2 = []
-                            dama = False
-                            k=0                     #ver se ha dama(s) na mesa
-                            while k <= len(table)-1:
-                                if table[k][0] == 12:
-                                    dama = True
+                            else:
+                                pass
+                            j+=1    
+                    i+=1
+             
+                i=0
+                while i <= len(occ)-1 and escolhido == False:
+                    aux=[]
+                    k=0
+                    while k <= len(selectable)-1:
+                        if selectable[k][1] == occ[i][1]:
+                            aux += [selectable[k]]
+                        k+=1
+                    aux2 = []
+                    j=0
+                    while j <= len(aux)-1:
+                        if aux[j][0] < 12: #lista com as cartas abaixo da dama 
+                            aux2 += [aux[j]]
+                        j+=1
+                    if len(aux2) >= 3:
+                        j=0
+                        while j <= len(aux)-1:
+                    
+                            if ((13,aux[0][1]) or (14,aux[0][1])) in aux: #se temos rei ou as na mao
+                                chosen = max(aux2)
+                                escolhido = True
+                            else:
+                                pass
+                            j+=1    
+                    i+=1
+                
+                if escolhido == False:
+                    i=0
+                    while i <= len(occ)-1 and escolhido == False:
+                        if occ[i][0] > 0:
+                            aux=[]
+                            k=0
+                            while k <= len(selectable)-1:
+                                if selectable[k][1] == occ[i][1]:
+                                    aux += [selectable[k]]
                                 k+=1
-                            if dama == True:
-                                    j=0
-                                    while j <= len(selectable)-1: #jogar abaixo se possivel
-                                        if selectable[j][0] < puxada[0]:
-                                            lst1 += [selectable[j]]
-                                        else:
-                                            lst2 += [selectable[j]] #cc jogar o maximo 
-                                        j+=1
-                                    if lst1 != []:
-                                        chosen = max(lst1)
-                                    else:
-                                        chosen = max(lst2)
-                            if len(table) == 3 and dama == False:
-                                if max(selectable)[0] == 12:
-                                    if len(selectable) == 1:
-                                        chosen = max(selectable)
-                                    else:
-                                        chosen = selectable[-2]
+                            aux2 = []
+                            j=0
+                            while j <= len(aux)-1:
+                                if aux[j][0] < 12:
+                                    aux2 +=[aux[j]]
+                                j+=1
+                            if aux2 != []:
+                                chosen = max(aux2)
+                                escolhido = True
+                            else:
+                                pass
+                            
+                        i+=1     
+                    if escolhido == False:
+                        chosen = max(selectable)
+                        escolhido = True
+                
+                self.hand.remove(chosen)
+            else:
+                i=0
+                puxada = table[0] 
+                while i <= len(table)-1:
+                    if table[i][0] > puxada[0] and table[i][1] == table[0][1]:
+                        puxada = table[i]
+                    i=i+1                    
+                if selectable[0][1] == puxada[1]: #selectable contains one card of the same suit at least
+                    aux3=[]
+                    if selectable[0][1] == 'D':
+                        aux3 = [x for x in self.diam if x not in selectable]       #naipe sem a mao do jogador 
+                    if selectable[0][1] == 'H':
+                        aux3 = [x for x in self.hearts if x not in selectable]       #naipe sem a mao do jogador 
+                    if selectable[0][1] == 'C':
+                        aux3 = [x for x in self.clubs if x not in selectable]       #naipe sem a mao do jogador 
+                    if selectable[0][1] == 'S':
+                        aux3 = [x for x in self.spades if x not in selectable]       #naipe sem a mao do jogador 
+                    if len(aux3) > 5: #definimos jogar a mais alta (ate a dama) ate haver 5 cartas do naipe (equivalente a 2 puxadas ja feitas)
+                        j=0
+                        ate12 = []
+                        mais12 = []
+                        while j<=len(selectable)-1:
+                            if selectable[j][0] < 12:   #cartas abaixo da dama
+                                ate12 += [selectable[j]]
+                            else:
+                                mais12 += [selectable[j]]                            
+                            j+=1
+                        if ate12 != []:
+                            chosen = max(ate12)
+                        else:
+                            chosen = min(mais12)
+                    else:   
+                        if len(table) == 3:   
+                            if max(selectable) != 12: 
+                                chosen = max(selectable)
+                            else:
+                                chosen = selectable[-2]
+                        elif  aux3 != []:
+                            chosen = min(selectable)
+                        else:
+                            chosen = max(selectable)
+                    lst1 = []
+                    lst2 = []
+                    dama = False
+                    k=0                     #ver se ha dama(s) na mesa
+                    while k <= len(table)-1:
+                        if table[k][0] == 12:
+                            dama = True
+                        k+=1
+                    if dama == True:
+                            j=0
+                            while j <= len(selectable)-1: #jogar abaixo se possivel
+                                if selectable[j][0] < puxada[0]:
+                                    lst1 += [selectable[j]]
                                 else:
-                                    chosen = max(selectable)
-                                    
-                            over12 = False   #ha cartas acima da dama na mesa (as e rei)?
-                            i=0
-                            while i <= len(table)-1:
-                                if table[i][1] == puxada[1] and (table[i][0] == 13 or table[i][0] == 14):
-                                    over12 = True
-                                i+=1
-                            if over12 == True:
-                                if (12,selectable[0][1]) in selectable:
-                                    chosen = (12,selectable[0][1])
-        
-                        
-                        
-                        
-                        else:    #baldar cartas
-                            occ=[]
-                            nd=0     #number of cards in hand for each suit
-                            nh=0
-                            nc=0
-                            ns=0
+                                    lst2 += [selectable[j]] #cc jogar o maximo 
+                                j+=1
+                            if lst1 != []:
+                                chosen = max(lst1)
+                            else:
+                                chosen = max(lst2)
+                    if len(table) == 3 and dama == False:
+                        if max(selectable)[0] == 12:
+                            if len(selectable) == 1:
+                                chosen = max(selectable)
+                            else:
+                                chosen = selectable[-2]
+                        else:
+                            chosen = max(selectable)
+                            
+                    over12 = False   #ha cartas acima da dama na mesa (as e rei)?
+                    i=0
+                    while i <= len(table)-1:
+                        if table[i][1] == puxada[1] and (table[i][0] == 13 or table[i][0] == 14):
+                            over12 = True
+                        i+=1
+                    if over12 == True:
+                        if (12,selectable[0][1]) in selectable:
+                            chosen = (12,selectable[0][1])
+    
+                else:    #baldar cartas
+                    occ=[]
+                    nd=0     #number of cards in hand for each suit
+                    nh=0
+                    nc=0
+                    ns=0
+                    j=0
+                    while j <= len(selectable)-1:
+                        if selectable[j][1] == 'D':
+                            nd+=1
+                        if selectable[j][1] == 'H':
+                            nh+=1
+                        if selectable[j][1] == 'C':
+                            nc+=1
+                        if selectable[j][1] == 'S':
+                            ns+=1
+                        j+=1
+                    occ = [[nd,'D'], [nh,'H'], [nc,'C'], [ns,'S']] #list of occurences for each suit 
+                    occ = sorted(occ, key = lambda x: x[0])                
+                    escolhido = False
+                    i=0
+                    while i <= len(occ)-1 and escolhido == False:
+                        aux= []
+                        if occ[i][0] > 0:
+                            if occ[i][1] == 'D':
+                                aux3 = [x for x in self.diam if x not in selectable]       #naipe sem a mao do jogador 
+                            if occ[i][1] == 'H':
+                                aux3 = [x for x in self.hearts if x not in selectable]       #naipe sem a mao do jogador 
+                            if occ[i][1] == 'C':
+                                aux3 = [x for x in self.clubs if x not in selectable]       #naipe sem a mao do jogador 
+                            if occ[i][1] == 'S':
+                                aux3 = [x for x in self.spades if x not in selectable] 
+                            
+                            dama = False
                             j=0
                             while j <= len(selectable)-1:
-                                if selectable[j][1] == 'D':
-                                    nd+=1
-                                if selectable[j][1] == 'H':
-                                    nh+=1
-                                if selectable[j][1] == 'C':
-                                    nc+=1
-                                if selectable[j][1] == 'S':
-                                    ns+=1
+                                if selectable[j][1] == occ[i][1]:
+                                    aux += [selectable[j]]
                                 j+=1
-                            occ = [[nd,'D'], [nh,'H'], [nc,'C'], [ns,'S']] #list of occurences for each suit 
-                            occ = sorted(occ, key = lambda x: x[0])                
-                            escolhido = False
-                            i=0
-                            while i <= len(occ)-1 and escolhido == False:
-                                aux= []
-                                if occ[i][0] > 0:
-                                    if occ[i][1] == 'D':
-                                        aux3 = [x for x in self.diam if x not in selectable]       #naipe sem a mao do jogador 
-                                    if occ[i][1] == 'H':
-                                        aux3 = [x for x in self.hearts if x not in selectable]       #naipe sem a mao do jogador 
-                                    if occ[i][1] == 'C':
-                                        aux3 = [x for x in self.clubs if x not in selectable]       #naipe sem a mao do jogador 
-                                    if occ[i][1] == 'S':
-                                        aux3 = [x for x in self.spades if x not in selectable] 
-                                    
-                                    
-                                    
-                                    dama = False
-                                    j=0
-                                    while j <= len(selectable)-1:
-                                        if selectable[j][1] == occ[i][1]:
-                                            aux += [selectable[j]]
-                                        j+=1
-                                    k=0
-                                    while k <= len(aux)-1:   #se existir dama e eu tiver menos cartas que as que me faltam sair
-                                        if aux[k][0] == 12:
-                                            dama = True
-                                        k+=1
-                                    under12 = []  #conj de cartas abaixo da dama
-                                    if dama == True:
-                                        k=0
-                                        while k <= len(aux)-1:
-                                            if aux[k][0] < 12:
-                                                under12 += [aux[k]]
-                                            k+=1
-                                        if len(under12) < len(aux3):
-                                            chosen = (12, occ[i][1])
-                                            escolhido = True
-                                    
-                                    j=0
-                                    over12 = []
-                                    while j <= len(aux)-1:   #se existir um rei ou as -> baldar
-                                        if aux[j][0] > 12:
-                                            over12 += [aux[j]]
-                                        j+=1
-                                    if over12 != []:
-                                        chosen = max(over12)
-                                        escolhido = True
-                                        
-                                    
-                                    if aux3[:len(aux)] != aux:  #se forem as cartas mais baixas do naipe
-                                        chosen = max(aux)
-                                        escolhido = True
-                                   
-                                i+=1
-                        
-                        
-                        
-                        self.hand.remove(chosen)
-                    
-                    if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
-                        self.diam.remove(chosen)
-                    if chosen[1] == 'H':
-                        self.hearts.remove(chosen)                
-                    if chosen[1] == 'S':
-                        self.spades.remove(chosen)                
-                    if chosen[1] == 'C':
-                        self.clubs.remove(chosen)
-                    return chosen 
+                            k=0
+                            while k <= len(aux)-1:   #se existir dama e eu tiver menos cartas que as que me faltam sair
+                                if aux[k][0] == 12:
+                                    dama = True
+                                k+=1
+                            under12 = []  #conj de cartas abaixo da dama
+                            if dama == True:
+                                k=0
+                                while k <= len(aux)-1:
+                                    if aux[k][0] < 12:
+                                        under12 += [aux[k]]
+                                    k+=1
+                                if len(under12) < len(aux3):
+                                    chosen = (12, occ[i][1])
+                                    escolhido = True
+                            
+                            j=0
+                            over12 = []
+                            while j <= len(aux)-1:   #se existir um rei ou as -> baldar
+                                if aux[j][0] > 12:
+                                    over12 += [aux[j]]
+                                j+=1
+                            if over12 != []:
+                                chosen = max(over12)
+                                escolhido = True
+                                
+                            
+                            if aux3[:len(aux)] != aux:  #se forem as cartas mais baixas do naipe
+                                chosen = max(aux)
+                                escolhido = True
+                           
+                        i+=1
+                
+                self.hand.remove(chosen)
+            
+            if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
+                self.diam.remove(chosen)
+            if chosen[1] == 'H':
+                self.hearts.remove(chosen)                
+            if chosen[1] == 'S':
+                self.spades.remove(chosen)                
+            if chosen[1] == 'C':
+                self.clubs.remove(chosen)
+            return chosen 
+
+
+
+
+
+
+
 
 
 ################
@@ -1094,7 +1086,9 @@ def round4(strat0,strat1,strat2,strat3):
         # Cards on the table (from first to last player)
         table=[]
         # Each player's turn
+        print(first)
         for n in range(first,first+4): 
+            print(table)
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
