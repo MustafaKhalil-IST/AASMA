@@ -14,10 +14,21 @@ class Agent:
         self.hand=hand
         self.strat=strategy
         self.round=r
+        # lists of cards of each suit that have not been played yet (proactive agent)
         self.hearts = list(product(figures, 'H'))
         self.spades = list(product(figures, 'S'))
         self.diam = list(product(figures, 'D'))
         self.clubs = list(product(figures , 'C'))
+    
+    def update(self,card): # updates the list of cards that have not been played 
+        if card[1] == 'D':   
+            self.diam.remove(card)
+        if card[1] == 'H':
+            self.hearts.remove(card)                
+        if card[1] == 'S':
+            self.spades.remove(card)                
+        if card[1] == 'C':
+            self.clubs.remove(card)     
     
     def play(self,table): 
         # Determining cards that can be played
@@ -294,15 +305,7 @@ class Agent:
                      i=i+1
                  if not escolhido:
                      chosen=sorted(selectable)[0]
-                 self.hand.remove(chosen)
-                 if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
-                    self.diam.remove(chosen)
-                 if chosen[1] == 'H':
-                    self.hearts.remove(chosen)                
-                 if chosen[1] == 'S':
-                    self.spades.remove(chosen)                
-                 if chosen[1] == 'C':
-                    self.clubs.remove(chosen)                 
+                 self.hand.remove(chosen)               
             if table != []:
                 i=0
                 puxada = table[0] 
@@ -383,14 +386,6 @@ class Agent:
                                 break
                         i=i+1
                 self.hand.remove(chosen)
-                if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
-                    self.diam.remove(chosen)
-                if chosen[1] == 'H':
-                    self.hearts.remove(chosen)                
-                if chosen[1] == 'S':
-                    self.spades.remove(chosen)                
-                if chosen[1] == 'C':
-                    self.clubs.remove(chosen)
             return chosen
         
         elif self.strat == 'proactive' and self.round==2:
@@ -584,14 +579,6 @@ class Agent:
                                     escolhido = True
                         i+=1           
                 self.hand.remove(chosen)
-            if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
-                self.diam.remove(chosen)
-            if chosen[1] == 'H':
-                self.hearts.remove(chosen)                
-            if chosen[1] == 'S':
-                self.spades.remove(chosen)                
-            if chosen[1] == 'C':
-                self.clubs.remove(chosen)
             return chosen 
 
 
@@ -856,15 +843,6 @@ class Agent:
                         i+=1
                 
                 self.hand.remove(chosen)
-            
-            if chosen[1] == 'D':   #parte da contagem de cartas que faltam sair
-                self.diam.remove(chosen)
-            if chosen[1] == 'H':
-                self.hearts.remove(chosen)                
-            if chosen[1] == 'S':
-                self.spades.remove(chosen)                
-            if chosen[1] == 'C':
-                self.clubs.remove(chosen)
             return chosen 
 
 
@@ -897,7 +875,7 @@ points=[0,0,0,0]
 
 ### FIRST ROUND: -20 FOR EACH TRICK ###
 
-def round1(strat0,strat1,strat2,strat3):
+def round1(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
     points=[0,0,0,0]
     
     # Shuffle the deck
@@ -919,7 +897,6 @@ def round1(strat0,strat1,strat2,strat3):
     log='Round 1'+'\n initial hands:\n a0: '+str(a0.hand)+'\n a1: '+str(a1.hand)+'\n a2: '+str(a2.hand)+'\n a3: '+str(a3.hand)+'\n \n'
     
     # Starting player
-    first=np.random.choice(range(4)) 
     log+='first player: '+str(first)+'\n'
     
     # Playing the 13 rounds
@@ -931,6 +908,9 @@ def round1(strat0,strat1,strat2,strat3):
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
+            for agent in players:
+                if agent.strat=='proactive':
+                    agent.update(table[-1])
         # Determining winning player
         m=0
         for k in range(1,4):
@@ -950,7 +930,7 @@ def round1(strat0,strat1,strat2,strat3):
 
 ### SECOND ROUND: -20 FOR EACH HEART ###
 
-def round2(strat0,strat1,strat2,strat3):
+def round2(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
     points=[0,0,0,0]
     
     # Shuffle the deck
@@ -972,7 +952,6 @@ def round2(strat0,strat1,strat2,strat3):
     log='Round 2'+'\n initial hands:\n a0: '+str(a0.hand)+'\n a1: '+str(a1.hand)+'\n a2: '+str(a2.hand)+'\n a3: '+str(a3.hand)+'\n \n'
     
     # Starting player
-    first=np.random.choice(range(4)) 
     log+='first player: '+str(first)+'\n'
     
     # Playing the 13 rounds
@@ -1003,7 +982,7 @@ def round2(strat0,strat1,strat2,strat3):
 
 ### THIRD ROUND: -50 FOR EACH QUEEN ###
 
-def round3(strat0,strat1,strat2,strat3):
+def round3(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
     points=[0,0,0,0]
     
     # Shuffle the deck
@@ -1025,7 +1004,6 @@ def round3(strat0,strat1,strat2,strat3):
     log='Round 3'+'\n initial hands:\n a0: '+str(a0.hand)+'\n a1: '+str(a1.hand)+'\n a2: '+str(a2.hand)+'\n a3: '+str(a3.hand)+'\n \n'
     
     # Starting player
-    first=np.random.choice(range(4)) 
     log+='first player: '+str(first)+'\n'
     
     # Playing the 13 rounds
@@ -1056,7 +1034,7 @@ def round3(strat0,strat1,strat2,strat3):
 
 ### FOURTH ROUND: -50 FOR EACH QUEEN ###
 
-def round4(strat0,strat1,strat2,strat3):
+def round4(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
     points=[0,0,0,0]
     
     # Shuffle the deck
@@ -1078,7 +1056,6 @@ def round4(strat0,strat1,strat2,strat3):
     log='Round 4'+'\n initial hands:\n a0: '+str(a0.hand)+'\n a1: '+str(a1.hand)+'\n a2: '+str(a2.hand)+'\n a3: '+str(a3.hand)+'\n \n'
     
     # Starting player
-    first=np.random.choice(range(4)) 
     log+='first player: '+str(first)+'\n'
     
     # Playing the 13 rounds
@@ -1086,9 +1063,7 @@ def round4(strat0,strat1,strat2,strat3):
         # Cards on the table (from first to last player)
         table=[]
         # Each player's turn
-        print(first)
         for n in range(first,first+4): 
-            print(table)
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
@@ -1111,7 +1086,7 @@ def round4(strat0,strat1,strat2,strat3):
 
 ### FIFTH ROUND: -160 FOR THE KING OF HEARTS ###
 
-def round5(strat0,strat1,strat2,strat3):
+def round5(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
     points=[0,0,0,0]
     
     # Shuffle the deck
@@ -1133,7 +1108,6 @@ def round5(strat0,strat1,strat2,strat3):
     log='Round 5'+'\n initial hands:\n a0: '+str(a0.hand)+'\n a1: '+str(a1.hand)+'\n a2: '+str(a2.hand)+'\n a3: '+str(a3.hand)+'\n \n'
     
     # Starting player
-    first=np.random.choice(range(4)) 
     log+='first player: '+str(first)+'\n'
     
     # Playing the 13 rounds
@@ -1165,7 +1139,7 @@ def round5(strat0,strat1,strat2,strat3):
 
 ### SIXTH ROUND: -90 FOR EACH OF THE LAST TWO TRICKS ###
 
-def round6(strat0,strat1,strat2,strat3):
+def round6(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
     points=[0,0,0,0]
     
     # Shuffle the deck
@@ -1187,7 +1161,6 @@ def round6(strat0,strat1,strat2,strat3):
     log='Round 6'+'\n initial hands:\n a0: '+str(a0.hand)+'\n a1: '+str(a1.hand)+'\n a2: '+str(a2.hand)+'\n a3: '+str(a3.hand)+'\n \n'
     
     # Starting player
-    first=np.random.choice(range(4)) 
     log+='first player: '+str(first)+'\n'
     
     # Playing the 13 rounds
@@ -1253,3 +1226,22 @@ def test_round6(strat,n):
     for j in range(n):
         total+=round6(strat,'random','random','random')[0]
     return total/n
+
+def winrate(strat,n):
+    wins=0
+    for j in range(n):
+        starter=np.random.choice(range(4))
+        points=round1(strat,'random','random','random',starter)
+        points=np.add(points,round2(strat,'random','random','random',(starter+1)%4))
+        points=np.add(points,round3(strat,'random','random','random',(starter+2)%4))
+        points=np.add(points,round4(strat,'random','random','random',(starter+3)%4))
+        points=np.add(points,round5(strat,'random','random','random',starter))
+        points=np.add(points,round6(strat,'random','random','random',(starter+1)%4))
+        if points[0]==max(points):
+            wins+=1
+    return wins/n
+
+
+
+
+
