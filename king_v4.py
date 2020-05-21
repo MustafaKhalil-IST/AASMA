@@ -963,6 +963,9 @@ def round2(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
+            for agent in players:
+                if agent.strat=='proactive':
+                    agent.update(table[-1])
         # Determining winning player
         m=0
         for k in range(1,4):
@@ -1015,6 +1018,9 @@ def round3(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
+            for agent in players:
+                if agent.strat=='proactive':
+                    agent.update(table[-1])
         # Determining winning player
         m=0
         for k in range(1,4):
@@ -1067,6 +1073,9 @@ def round4(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
+            for agent in players:
+                if agent.strat=='proactive':
+                    agent.update(table[-1])
         # Determining winning player
         m=0
         for k in range(1,4):
@@ -1119,6 +1128,9 @@ def round5(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
+            for agent in players:
+                if agent.strat=='proactive':
+                    agent.update(table[-1])
         # Determining winning player
         m=0
         for k in range(1,4):
@@ -1172,6 +1184,9 @@ def round6(strat0,strat1,strat2,strat3,first=np.random.choice(range(4))):
             # Player number
             m=n%4 
             table+=[players[m].play(table)]
+            for agent in players:
+                if agent.strat=='proactive':
+                    agent.update(table[-1])
         # Determining winning player
         m=0
         for k in range(1,4):
