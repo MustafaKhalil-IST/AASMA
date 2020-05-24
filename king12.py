@@ -2815,7 +2815,10 @@ class Agent:
                                 if carta == (11, selectable[0][1]) and len(table) == 2 and((len(table)==2 and table[0]==max([card for card in table if card[1]==table[0][1]])) or (len(table)==3 and table[1]==max([card for card in table if card[1]==table[0][1]]))):
                                     if (13, selectable[0][1]) in aux3: 
                                         selectable2 = [item for item in selectable if item[0] <= 12]
-                                        chosen = max(selectable2)
+                                        if selectable2!=[]:
+                                            chosen = max(selectable2)
+                                        else:
+                                            chosen = max(selectable)
                                     else:
                                         chosen = max(selectable)
                                         
