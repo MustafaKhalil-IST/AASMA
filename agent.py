@@ -1,4 +1,9 @@
+import datetime
+from itertools import product
+
 import numpy as np
+
+FIGURES = range(2, 15)
 
 
 class Agent:
@@ -6,11 +11,39 @@ class Agent:
         self.hand = None
         self.strategy = None
         self.round = None
+        self.hearts, self.spades, self.diamonds, self.clubs = None, None, None, None
+        self.partner = None
+        self.table = None
 
     def new_round(self, hand, strategy, round):
         self.hand = hand
         self.strategy = strategy
         self.round = round
+        if self.strategy.name == 'proactive' or self.strategy.name == 'proactive_coop':
+            # lists of cards of each suit that have not been played yet (proactive agent)
+            self.hearts = list(product(FIGURES, 'H'))
+            self.spades = list(product(FIGURES, 'S'))
+            self.diamonds = list(product(FIGURES, 'D'))
+            self.clubs = list(product(FIGURES, 'C'))
+            if self.strategy.name == 'proactive_coop':
+                self.partner = []
+
+    def update(self, table, diff):
+        # updates the list of cards that have not been played
+        if self.strategy == 'proactive' or self.strategy == 'proactive_coop':
+            card = table[-1]
+            if card[1] == 'D':
+                self.diamonds.remove(card)
+            elif card[1] == 'H':
+                self.hearts.remove(card)
+            elif card[1] == 'S':
+                self.spades.remove(card)
+            else:
+                self.clubs.remove(card)
+            if self.strategy == 'proactive_coop' and diff == 2:
+                # diff==2 means that the card was played by the partner
+                if card[1] != table[0][1] and card[1] not in self.partner:
+                    self.partner += [card[1]]
 
     def determine_selectable_cards(self, table):
         # Determining cards that can be played
@@ -54,27 +87,11 @@ class Agent:
                     selectable = [(13, 'H')]
         return selectable
 
-    def play(self, table):
+    def play(self, table, round):
+        print("{} - LOG: round: {} - table: {}".format(datetime.datetime.now(), round, table))
+        self.table = table
         selectable = self.determine_selectable_cards(table)
+        return self.strategy.play(selectable, round)
 
-        # Deciding what to play according to strategy
-        if self.strategy == 'random':  # Strategy: plays a random card
-            chosen = self.random_strategy(selectable)
-            return chosen
-        elif self.strategy == 'play_low':  # Strategy: plays the card of lowest rank
-            chosen = self.play_low_strategy(selectable)
-            return chosen
 
-    def play_low_strategy(self, selectable):
-        i = 0
-        for j in range(len(selectable)):
-            if selectable[j][0] < selectable[i][0]:
-                i = j
-        chosen = selectable[i]
-        return chosen
 
-    def random_strategy(self, selectable):
-        index = np.random.choice(range(len(selectable)))
-        chosen = selectable[index]
-        self.hand.remove(chosen)
-        return chosen

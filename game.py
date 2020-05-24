@@ -2,6 +2,25 @@ from itertools import product
 from agent import Agent
 import numpy as np
 
+from play_high_strategy import PlayHighStartegy
+from play_low_strategy import PlayLowStrategy
+from proactive_strategy import Proactive
+from random_strategy import RandomStrategy
+from reactive_strategy import Reactive
+
+
+def get_strategy(strategy, player):
+    if strategy == "play_low":
+        return PlayLowStrategy(player)
+    if strategy == "play_high":
+        return PlayHighStartegy(player)
+    if strategy == "random":
+        return RandomStrategy(player)
+    if strategy == "reactive":
+        return Reactive(player)
+    if strategy == "proactive":
+        return Proactive(player)
+
 
 class Game:
     def __init__(self):
@@ -23,10 +42,10 @@ class Game:
         np.random.shuffle(self.deck)
 
         # Deal initial hands
-        self.a0.new_round(self.deck[:13], strategies[0], round)
-        self.a1.new_round(self.deck[13:26], strategies[1], round)
-        self.a2.new_round(self.deck[26:39], strategies[2], round)
-        self.a3.new_round(self.deck[39:52], strategies[3], round)
+        self.a0.new_round(self.deck[:13], get_strategy(strategies[0], self.a0), round)
+        self.a1.new_round(self.deck[13:26], get_strategy(strategies[1], self.a1), round)
+        self.a2.new_round(self.deck[26:39], get_strategy(strategies[2], self.a2), round)
+        self.a3.new_round(self.deck[39:52], get_strategy(strategies[3], self.a3), round)
 
     def determine_winner(self):
         m = 0
@@ -72,7 +91,7 @@ class Game:
         for n in range(self.first, self.first + 4):
             # Player number
             m = n % 4
-            self.table += [self.players[m].play(self.table)]
+            self.table += [self.players[m].play(self.table, round=round)]
         # Determining winning player
         self.winner = self.determine_winner()
         # Update points

@@ -37,7 +37,7 @@ players_positions = [(800, 300), (400 + 20, 700), (0, 300), (400 + 20, 0)]
 current_strategies = ["Select Strategy", "Select Strategy", "Select Strategy", "Select Strategy"]
 strategies_positions = [
     (players_positions[0][0], players_positions[0][1] + 30),
-    (players_positions[1][0] + 50, players_positions[1][1] + 10),
+    (players_positions[1][0] + 150, players_positions[1][1] - 75),
     (players_positions[2][0] + 10, players_positions[2][1] + 50),
     (players_positions[3][0] + 50, players_positions[3][1] + 10)
 ]
@@ -47,7 +47,10 @@ stratgies_buttons = [
 shown_strategies = -1
 strategies_options = [
     pygame.Rect(0, 0 + 20, 100, 30),
-    pygame.Rect(0, 0 + 50, 100, 30)
+    pygame.Rect(0, 0 + 50, 100, 30),
+    pygame.Rect(0, 0 + 80, 100, 30),
+    pygame.Rect(0, 0 + 110, 100, 30),
+    pygame.Rect(0, 0 + 140, 100, 30),
 ]
 
 x_button, y_button = 100, 600
@@ -143,10 +146,19 @@ def show_strategies_menu(index):
     x, y = strategies_positions[index]
     strategies_options[0] = pygame.Rect(x, y + 20, 100, 30)
     strategies_options[1] = pygame.Rect(x, y + 50, 100, 30)
+    strategies_options[2] = pygame.Rect(x, y + 80, 100, 30)
+    strategies_options[3] = pygame.Rect(x, y + 110, 100, 30)
+    strategies_options[4] = pygame.Rect(x, y + 140, 100, 30)
     pygame.draw.rect(screen, (125, 125, 0), strategies_options[0])
     screen.blit(pygame.font.SysFont('Arial', 20).render('play_low', True, (255, 255, 255)), (x + 5, y + 20))
     pygame.draw.rect(screen, (250, 125, 0), strategies_options[1])
-    screen.blit(pygame.font.SysFont('Arial', 20).render('random', True, (255, 255, 255)), (x + 5, y + 50))
+    screen.blit(pygame.font.SysFont('Arial', 20).render('play_high', True, (255, 255, 255)), (x + 5, y + 50))
+    pygame.draw.rect(screen, (75, 125, 75), strategies_options[2])
+    screen.blit(pygame.font.SysFont('Arial', 20).render('random', True, (255, 255, 255)), (x + 5, y + 80))
+    pygame.draw.rect(screen, (125, 75, 75), strategies_options[3])
+    screen.blit(pygame.font.SysFont('Arial', 20).render('reactive', True, (255, 255, 255)), (x + 5, y + 110))
+    pygame.draw.rect(screen, (250, 75, 75), strategies_options[4])
+    screen.blit(pygame.font.SysFont('Arial', 20).render('proactive', True, (255, 255, 255)), (x + 5, y + 140))
 
 
 def display_screen():
@@ -218,7 +230,17 @@ while running:
                     player = min([(j, np.abs(players_positions[j][0] - mouse_pos[0])
                                    + np.abs(players_positions[j][1] - mouse_pos[1])) for j in range(4)],
                                  key=lambda x: x[1])[0]
-                    current_strategies[player] = "play_low" if i == 0 else "random"
+                    if i == 0:
+                        current_strategies[player] = "play_low"
+                    elif i == 1:
+                        current_strategies[player] = "play_high"
+                    elif i == 2:
+                        current_strategies[player] = "random"
+                    elif i == 3:
+                        current_strategies[player] = "reactive"
+                    elif i == 4:
+                        current_strategies[player] = "proactive"
+
 
         # Did the user click the window close button? If so, stop the loop.
         elif event.type == QUIT:
