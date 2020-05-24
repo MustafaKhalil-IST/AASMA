@@ -300,7 +300,7 @@ class Proactive(Strategy):
                                 if occurrences[i][1] == 'S':
                                     aux2 = self.player.spades
                                 if occurrences[i][1] == 'D':
-                                    aux2 = self.player.diam
+                                    aux2 = self.player.diamonds
                                 if occurrences[i][1] == 'C':
                                     aux2 = self.player.clubs
                                 j = 0
@@ -916,7 +916,7 @@ class Proactive(Strategy):
                                             selected = True
                         i += 1
                     i = 0
-                    while i <= len(occurrences) - 1 and selected == False:
+                    while i <= len(occurrences) - 1 and not selected:
                         aux = []
                         if occurrences[i][0] > 0:
                             if occurrences[i][1] == 'D':
@@ -945,11 +945,11 @@ class Proactive(Strategy):
                                 selected = True
                         i += 1
                     i = 0
-                    while i <= len(occurrences) - 1 and selected == False:
+                    while i <= len(occurrences) - 1 and not selected:
                         aux = []
                         if occurrences[i][0] > 0:
                             if occurrences[i][1] == 'D':
-                                aux3 = [x for x in self.player.diam if x not in selectable]
+                                aux3 = [x for x in self.player.diamonds if x not in selectable]
                                 aux4 = self.player.diamonds
                             if occurrences[i][1] == 'H':
                                 aux3 = [x for x in self.player.hearts if x not in selectable]
@@ -1132,13 +1132,13 @@ class Proactive(Strategy):
                         if occurrences[i][0] > 0:
                             if occurrences[i][1] == 'D':
                                 aux2 = self.player.diamonds
-                                aux3 = [x for x in self.player.diam if x not in selectable]
+                                aux3 = [x for x in self.player.diamonds if x not in selectable]
                             if occurrences[i][1] == 'H':
                                 aux2 = self.player.hearts
                                 aux3 = [x for x in self.player.hearts if x not in selectable]
                             if occurrences[i][1] == 'C':
                                 aux2 = self.player.clubs
-                                aux3 = [x for x in self.clubs if x not in selectable]  # naipe sem a mao do jogador
+                                aux3 = [x for x in self.player.clubs if x not in selectable]
                             if occurrences[i][1] == 'S':
                                 aux2 = self.player.spades
                                 aux3 = [x for x in self.player.spades if x not in selectable]
@@ -1164,7 +1164,7 @@ class Proactive(Strategy):
         if round == 6:
             if len(self.player.table) == 1:
                 drown = self.player.table[0]  # 1st card played in the table
-            if self.player.table == []:
+            if not self.player.table:
                 # number of cards in hand for each suit
                 nd, nh, nc, ns = 0, 0, 0, 0
                 j = 0
@@ -1222,7 +1222,7 @@ class Proactive(Strategy):
                         chosen = max(selectable)
                 self.player.hand.remove(chosen)
 
-            if self.player.table != []:
+            if self.player.table:
                 i = 0
                 drown = self.player.table[0]
                 while i <= len(self.player.table) - 1:

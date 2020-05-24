@@ -92,8 +92,10 @@ class Game:
             # Player number
             m = n % 4
             self.table += [self.players[m].play(self.table, round=round)]
+            print(self.table)
         # Determining winning player
-        self.winner = self.determine_winner()
+        if not (round == 6 and i == 0):
+            self.winner = self.determine_winner()
         # Update points
         self.update_points(round=round, index=i)
         # Reset starting player

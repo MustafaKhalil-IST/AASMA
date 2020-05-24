@@ -29,6 +29,7 @@ current_table = ["1c", "2c", "3c", "4c"]
 current_round = 0
 current_turn = 0
 shown_player = 1
+winner = 'A1'
 players_numbers = [
     pygame.font.SysFont('Arial', 25, bold=True).render('A{}'.format(i + 1), True, (255, 69, 0)) for i in range(4)
 ]
@@ -57,6 +58,7 @@ x_button, y_button = 100, 600
 buttons = {
     "run": pygame.Rect(x_button, y_button, 75, 50),
     "rotate": pygame.Rect(x_button, y_button + 70, 100, 50),
+    "winner": pygame.Rect(350, 350, 200, 35),
 }
 
 
@@ -173,10 +175,19 @@ def display_screen():
     show_turn_number()
     show_table(cards=current_table)
     show_strategies_menu(shown_strategies)
+    if current_round == 7:
+        display_winner()
 
+
+def display_winner():
+    pygame.draw.rect(screen, [125, 75, 75], buttons["winner"])
+    screen.blit(pygame.font.SysFont('Arial', 25).render(' WINNER IS {}!!'.format(winner), True, (0, 255, 0)),
+                (350, 350))
 
 def run_turn():
-    table, winner, turn_points = game.turn(current_turn, current_round + 1, first=first)
+    if current_round == 7:
+        return
+    table, winner, turn_points = game.turn(current_turn, current_round, first=first)
     for i in range(4):
         points[i] = turn_points[i]
         current_table[i] = str(table[i][0] - 1) + str(table[i][1]).lower()
@@ -199,7 +210,7 @@ while running:
             mouse_pos = event.pos
             if buttons["run"].collidepoint(mouse_pos):
                 shown_strategies = -1
-                if current_round < 6:
+                if current_round < 7:
                     if current_turn == 0:
                         current_round += 1
                         strategies = [
@@ -207,9 +218,12 @@ while running:
                             if current_strategies[(i + shown_player + 2) % 4] != "Select Strategy" else "random"
                             for i in range(4)
                         ]
-                        first = np.random.choice(range(4))
+                        # first = np.random.choice(range(4))
                         game.setup(current_round, strategies)
-                    current_turn = (current_turn + 1) % 13
+                    current_turn = ((current_turn + 1) % 13)
+                    if current_round == 7:
+                        winner = 'A' + str(points.index(max(points)) + 1)
+                        display_screen()
                     run_turn()
             if buttons["rotate"].collidepoint(mouse_pos):
                 shown_strategies = -1
@@ -240,7 +254,6 @@ while running:
                         current_strategies[player] = "reactive"
                     elif i == 4:
                         current_strategies[player] = "proactive"
-
 
         # Did the user click the window close button? If so, stop the loop.
         elif event.type == QUIT:

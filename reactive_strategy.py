@@ -31,6 +31,7 @@ class Reactive(Strategy):
                 min_list = [card for card in selectable if card[0] == min_rank]
                 chosen = min(min_list, key=lambda x: len([card for card in selectable if card[1] == x[1]]))
             self.player.hand.remove(chosen)
+            return chosen
         if round == 2:
             if self.player.table:
                 follow = self.player.table[0][1]

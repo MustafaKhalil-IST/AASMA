@@ -88,10 +88,10 @@ class Agent:
         return selectable
 
     def play(self, table, round):
-        print("{} - LOG: round: {} - table: {}".format(datetime.datetime.now(), round, table))
         self.table = table
         selectable = self.determine_selectable_cards(table)
-        return self.strategy.play(selectable, round)
+        chosen = self.strategy.play(selectable, round)
+        return chosen
 
 
 
