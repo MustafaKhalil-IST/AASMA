@@ -52,6 +52,7 @@ strategies_options = [
     pygame.Rect(0, 0 + 80, 100, 30),
     pygame.Rect(0, 0 + 110, 100, 30),
     pygame.Rect(0, 0 + 140, 100, 30),
+    pygame.Rect(0, 0 + 170, 100, 30),
 ]
 
 x_button, y_button = 100, 600
@@ -151,6 +152,7 @@ def show_strategies_menu(index):
     strategies_options[2] = pygame.Rect(x, y + 80, 100, 30)
     strategies_options[3] = pygame.Rect(x, y + 110, 100, 30)
     strategies_options[4] = pygame.Rect(x, y + 140, 100, 30)
+    strategies_options[5] = pygame.Rect(x, y + 170, 100, 30)
     pygame.draw.rect(screen, (125, 125, 0), strategies_options[0])
     screen.blit(pygame.font.SysFont('Arial', 20).render('play_low', True, (255, 255, 255)), (x + 5, y + 20))
     pygame.draw.rect(screen, (250, 125, 0), strategies_options[1])
@@ -161,6 +163,8 @@ def show_strategies_menu(index):
     screen.blit(pygame.font.SysFont('Arial', 20).render('reactive', True, (255, 255, 255)), (x + 5, y + 110))
     pygame.draw.rect(screen, (250, 75, 75), strategies_options[4])
     screen.blit(pygame.font.SysFont('Arial', 20).render('proactive', True, (255, 255, 255)), (x + 5, y + 140))
+    pygame.draw.rect(screen, (150, 75, 175), strategies_options[5])
+    screen.blit(pygame.font.SysFont('Arial', 20).render('adaptive', True, (255, 255, 255)), (x + 5, y + 170))
 
 
 def display_screen():
@@ -183,6 +187,7 @@ def display_winner():
     pygame.draw.rect(screen, [125, 75, 75], buttons["winner"])
     screen.blit(pygame.font.SysFont('Arial', 25).render(' WINNER IS {}!!'.format(winner), True, (0, 255, 0)),
                 (350, 350))
+
 
 def run_turn():
     if current_round == 7:
@@ -254,6 +259,8 @@ while running:
                         current_strategies[player] = "reactive"
                     elif i == 4:
                         current_strategies[player] = "proactive"
+                    elif i == 5:
+                        current_strategies[player] = "adaptive"
 
         # Did the user click the window close button? If so, stop the loop.
         elif event.type == QUIT:

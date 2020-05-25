@@ -7,6 +7,7 @@ from play_low_strategy import PlayLowStrategy
 from proactive_strategy import Proactive
 from random_strategy import RandomStrategy
 from reactive_strategy import Reactive
+from adaptive_strategy import Adaptive
 
 
 def get_strategy(strategy, player):
@@ -20,6 +21,8 @@ def get_strategy(strategy, player):
         return Reactive(player)
     if strategy == "proactive":
         return Proactive(player)
+    if strategy == "adaptive":
+        return Adaptive(player)
 
 
 class Game:
@@ -70,6 +73,15 @@ class Game:
             if index == 11 or index == 12:
                 self.points[self.winner] -= 90
 
+        for i in range(4):
+            if self.players[i].strategy.name == "adaptive":
+                reward = 1 if i == self.winner else -1
+                new_state = {
+                    "table": self.table,
+                    "hand": self.players[i].hand
+                }
+                self.players[i].strategy.updateQ(new_state, reward)
+
     def round(self, round, strategies):
         self.setup(round=round, strategies=strategies)
 
@@ -92,7 +104,6 @@ class Game:
             # Player number
             m = n % 4
             self.table += [self.players[m].play(self.table, round=round)]
-            print(self.table)
         # Determining winning player
         if not (round == 6 and i == 0):
             self.winner = self.determine_winner()

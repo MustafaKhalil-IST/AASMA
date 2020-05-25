@@ -10,7 +10,7 @@ from agent import Agent
 class Learner(Agent):
     def __init__(self):
         super().__init__()
-        self._Q = {}
+        self.Q = {}
         self.last_state = None
         self.last_action = None
         self.learning_rate = .7
@@ -22,13 +22,13 @@ class Learner(Agent):
         self.last_action = None
 
     def get_action(self, state):
-        if state in self._Q and np.random.uniform(0, 1) < self.epsilon:
-            action = max(self._Q[state], key=self._Q[state].get)
+        if state in self.Q and np.random.uniform(0, 1) < self.epsilon:
+            action = max(self.Q[state], key=self.Q[state].get)
         else:
             action = np.random.choice([])  # TODO
-            if state not in self._Q:
-                self._Q[state] = {}
-            self._Q[state][action] = 0
+            if state not in self.Q:
+                self.Q[state] = {}
+            self.Q[state][action] = 0
 
         self.last_state = state
         self.last_action = action
@@ -36,18 +36,18 @@ class Learner(Agent):
         return action
 
     def update(self, new_state, reward):
-        old = self._Q[self.last_state][self.last_action]
+        old = self.Q[self.last_state][self.last_action]
 
-        if new_state in self._Q:
-            new = self.discount * self._Q[new_state][max(self._Q[new_state], key=self._Q[new_state].get)]
+        if new_state in self.Q:
+            new = self.discount * self.Q[new_state][max(self.Q[new_state], key=self.Q[new_state].get)]
         else:
             new = 0
 
-        self._Q[self.last_state][self.last_action] = (1 - self.learning_rate) * old + self.learning_rate * (
+        self.Q[self.last_state][self.last_action] = (1 - self.learning_rate) * old + self.learning_rate * (
                     reward + new)
 
     def get_optimal_strategy(self):
-        df = pd.DataFrame(self._Q).transpose()
+        df = pd.DataFrame(self.Q).transpose()
         df['optimal'] = df.apply(lambda x: 'hit' if x['hit'] >= x['stay'] else 'stay', axis=1)
         return df
 
@@ -55,14 +55,14 @@ class Learner(Agent):
 class DQNAgent(Learner):
     def __init__(self):
         super().__init__()
-        self._learning = True
-        self._learning_rate = .1
-        self._discount = .1
-        self._epsilon = .9
-        self._Q = {}
-        self._last_state = None
-        self._last_action = None
-        self._hand = []
+        self.learning = True
+        self.learning_rate = .1
+        self.discount = .1
+        self.epsilon = .9
+        self.Q = {}
+        self.last_state = None
+        self.last_action = None
+        self.hand = []
 
         # Create Model
         model = Sequential()
@@ -84,7 +84,7 @@ class DQNAgent(Learner):
     def get_action(self, state):
         rewards = self.model.predict([np.array([state])], batch_size=1)
 
-        if np.random.uniform(0, 1) < self._epsilon:
+        if np.random.uniform(0, 1) < self.epsilon:
             if rewards[0][0] > rewards[0][1]:
                 action = 1  # TODO
             else:
@@ -101,7 +101,7 @@ class DQNAgent(Learner):
     def update(self, new_state, reward):
         rewards = self.model.predict([np.array([new_state])], batch_size=1)
         maxQ = rewards[0][0] if rewards[0][0] > rewards[0][1] else rewards[0][1]
-        new = self._discount * maxQ
+        new = self.discount * maxQ
 
         if self.last_action == 0:  # TODO
             self.last_target[0][0] = reward + new

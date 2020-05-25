@@ -14,6 +14,7 @@ class Agent:
         self.hearts, self.spades, self.diamonds, self.clubs = None, None, None, None
         self.partner = None
         self.table = None
+        self.points = []
 
     def new_round(self, hand, strategy, round):
         self.hand = hand
